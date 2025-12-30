@@ -27,7 +27,7 @@ import {
 } from "lucide-react";
 
 // ⚠️ UPDATE THIS TO MATCH YOUR BACKEND PORT
-const API_BASE_URL = "http://localhost:5000"; 
+const API_BASE_URL = "https://bird-festival.onrender.com"; 
 
 // --- CONFIGURATION BASED ON YOUR MONGOOSE SCHEMAS ---
 const COMPETITION_TYPES = {

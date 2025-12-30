@@ -43,8 +43,27 @@ const PORT = process.env.PORT || 5000;
 // 🔌 Connect DB
 connectDB();
 
-// 🌐 Middleware
-app.use(cors());
+const allowedOrigins = [
+  'https://talchhaparbirdfestival.com',
+  'https://www.talchhaparbirdfestival.com',
+  'http://localhost:3000',
+  'http://localhost:5173'
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // allow requests with no origin (like mobile apps, curl)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
