@@ -2,7 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import path from 'path';
 
 import connectDB from './config/database.js';
 
@@ -31,11 +31,17 @@ import adminCompetitionRoutes from './routes/admin/adminCompetition.routes.js';
 import adminVolunteerRoutes from './routes/admin/adminVolunteer.routes.js';
 import adminReadingRoutes from './routes/admin/adminReading.routes.js';
 import adminResourcePersonRoutes from './routes/admin/adminResourcePerson.routes.js';
-import adminQuizRoutes from "./routes/admin/adminQuiz.routes.js";
+import adminQuizRoutes from './routes/admin/adminQuiz.routes.js';
+
 dotenv.config();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+// ================= PATH SETUP =================
+const __filename = fileURLToPath(
+    import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// 👉 CHANGE THIS PATH IF YOUR FRONTEND BUILD LOCATION IS DIFFERENT
+const frontendDistPath = path.join(__dirname, 'dist');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -43,32 +49,36 @@ const PORT = process.env.PORT || 5000;
 // 🔌 Connect DB
 connectDB();
 
+// ================= CORS =================
 const allowedOrigins = [
-  'https://talchhaparbirdfestival.com',
-  'https://www.talchhaparbirdfestival.com',
-  'http://localhost:3000',
-  'http://localhost:5173'
+    'https://talchhaparbirdfestival.com',
+    'https://www.talchhaparbirdfestival.com',
+    'http://localhost:5000',
+    'http://localhost:5173'
 ];
 
 app.use(cors({
-  origin: function (origin, callback) {
-    // allow requests with no origin (like mobile apps, curl)
-    if (!origin) return callback(null, true);
+    origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
 
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
+        if (allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true,
 }));
 
+// ================= MIDDLEWARE =================
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // 📂 Static uploads
-app.use('/uploads', express.static(join(__dirname, 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// 📂 Serve frontend build
+app.use(express.static(frontendDistPath));
 
 // ================= PUBLIC APIs =================
 app.use('/api/festival', festivalRoutes);
@@ -94,21 +104,20 @@ app.use('/api/admin/pledges', adminPledgeRoutes);
 app.use('/api/admin/competitions', adminCompetitionRoutes);
 app.use('/api/admin/volunteers', adminVolunteerRoutes);
 app.use('/api/admin/reading', adminReadingRoutes);
-app.use("/api/admin/resource-persons", adminResourcePersonRoutes);
-app.use("/api/admin/quizzes", adminQuizRoutes);
+app.use('/api/admin/resource-persons', adminResourcePersonRoutes);
+app.use('/api/admin/quizzes', adminQuizRoutes);
 
-// ❤️ Health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Bird Festival API is running' });
+// ================= SPA ROUTES =================
+app.get('/', (req, res) => {
+    res.sendFile(path.join(frontendDistPath, 'index.html'));
 });
 
-// ❌ Error handler
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: 'Something went wrong!' });
+// SPA fallback (React / Vite)
+app.get('*', (req, res) => {
+    res.sendFile(path.join(frontendDistPath, 'index.html'));
 });
 
 // 🚀 Start server
 app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
+    console.log(`✅ Server running on port ${PORT}`);
 });
