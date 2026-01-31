@@ -1,8 +1,10 @@
+
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
 import path from 'path';
+import rateLimit from 'express-rate-limit'; // Security: Rate Limiter
 
 import connectDB from './config/database.js';
 
@@ -17,6 +19,7 @@ import pledgeRoutes from './routes/pledgeRoutes.js';
 import resourcePersonRoutes from './routes/resourcePersonRoutes.js';
 import volunteerRoutes from './routes/volunteerRoutes.js';
 import readingRoutes from './routes/readingRoutes.js';
+import galleryRoutes from './routes/galleryRoutes.js';
 
 // 🔐 Admin auth
 import adminAuthRoutes from './routes/adminAuthRoutes.js';
@@ -32,6 +35,7 @@ import adminVolunteerRoutes from './routes/admin/adminVolunteer.routes.js';
 import adminReadingRoutes from './routes/admin/adminReading.routes.js';
 import adminResourcePersonRoutes from './routes/admin/adminResourcePerson.routes.js';
 import adminQuizRoutes from './routes/admin/adminQuiz.routes.js';
+import adminGalleryRoutes from './routes/admin/adminGallery.routes.js';
 
 dotenv.config();
 
@@ -49,10 +53,35 @@ const PORT = process.env.PORT || 5000;
 // 🔌 Connect DB
 connectDB();
 
+// ================= SECURITY: RATE LIMITING =================
+// 🔓 RATE LIMITING DISABLED FOR DEVELOPMENT
+// Uncomment below for production use
+
+// 1. General Limiter (Applies to all requests)
+// const generalLimiter = rateLimit({
+//     windowMs: 15 * 60 * 1000,
+//     max: 300,
+//     standardHeaders: true,
+//     legacyHeaders: false,
+//     message: { message: "Too many requests from this IP, please try again after 15 minutes" }
+// });
+// app.use(generalLimiter);
+
+// 2. Strict Limiter (For Forms & Auth)
+// const formLimiter = rateLimit({
+//     windowMs: 15 * 60 * 1000,
+//     max: 10,
+//     message: { message: "Too many submissions from this IP, please try again later" }
+// });
+
+// ✅ NO RATE LIMITING - For development/testing
+const formLimiter = (req, res, next) => next(); // Pass-through middleware
+
 // ================= CORS =================
 const allowedOrigins = [
     'https://talchhaparbirdfestival.com',
     'https://www.talchhaparbirdfestival.com',
+    'https://indigo-swan-728707.hostingersite.com',  // Hostinger deployment
     'http://localhost:5000',
     'http://localhost:5173'
 ];
@@ -81,19 +110,21 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(express.static(frontendDistPath));
 
 // ================= PUBLIC APIs =================
+// Apply strict limiter to sensitive routes
 app.use('/api/festival', festivalRoutes);
 app.use('/api/schedule', scheduleRoutes);
-app.use('/api/contact', contactRoutes);
+app.use('/api/contact', formLimiter, contactRoutes); // Secured
 app.use('/api/ebook', ebookRoutes);
 app.use('/api/competitions', competitionRoutes);
-app.use('/api/quiz', quizRoutes);
-app.use('/api/pledge', pledgeRoutes);
-app.use('/api/resource-person', resourcePersonRoutes);
-app.use('/api/volunteers', volunteerRoutes);
+app.use('/api/quiz', quizRoutes); // Quiz can have separate logic if needed
+app.use('/api/pledge', formLimiter, pledgeRoutes); // Secured
+app.use('/api/resource-person', formLimiter, resourcePersonRoutes); // Secured
+app.use('/api/volunteers', formLimiter, volunteerRoutes); // Secured
 app.use('/api/reading', readingRoutes);
+app.use('/api/gallery', galleryRoutes);
 
 // ================= ADMIN AUTH =================
-app.use('/api/admin', adminAuthRoutes);
+app.use('/api/admin', formLimiter, adminAuthRoutes); // Secured Login
 
 // ================= ADMIN CRUD =================
 app.use('/api/admin/festival', adminFestivalRoutes);
@@ -106,6 +137,7 @@ app.use('/api/admin/volunteers', adminVolunteerRoutes);
 app.use('/api/admin/reading', adminReadingRoutes);
 app.use('/api/admin/resource-persons', adminResourcePersonRoutes);
 app.use('/api/admin/quizzes', adminQuizRoutes);
+app.use('/api/admin/gallery', adminGalleryRoutes);
 
 // ================= SPA ROUTES =================
 app.get('/', (req, res) => {

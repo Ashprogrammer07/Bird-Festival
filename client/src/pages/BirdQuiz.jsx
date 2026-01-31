@@ -1,78 +1,52 @@
-import { useState } from 'react';
-import { generateQuizCertificate } from '../utils/certificateGenerator';
+
+import { useState, useEffect } from "react";
+import { generateQuizCertificate } from "../utils/certificateGenerator";
+import { quizAPI } from "../services/api";
 
 const BirdQuiz = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [showResults, setShowResults] = useState(false);
-  const [participantName, setParticipantName] = useState('');
+  const [participantName, setParticipantName] = useState("");
+  const [participantEmail, setParticipantEmail] = useState("");
   const [showNameInput, setShowNameInput] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [quizData, setQuizData] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
-  const questions = [
-    {
-      question: "What is the national bird of India?",
-      options: ["Peacock", "Eagle", "Swan", "Parrot"],
-      correct: 0
-    },
-    {
-      question: "Which bird is famous for building hanging nests in India?",
-      options: ["Sparrow", "Weaver Bird", "Mynah", "Bulbul"],
-      correct: 1
-    },
-    {
-      question: "The Great Indian Bustard is mainly found in which habitat?",
-      options: ["Rainforests", "Coastal areas", "Grasslands and deserts", "Mountains"],
-      correct: 2
-    },
-    {
-      question: "Which Indian bird is known for mimicking human speech?",
-      options: ["Crow", "Koel", "Parrot", "Kingfisher"],
-      correct: 2
-    },
-    {
-      question: "The Siberian Crane migrates to India during which season?",
-      options: ["Summer", "Monsoon", "Winter", "Spring"],
-      correct: 2
-    },
-    {
-      question: "Which bird is commonly associated with Indian monsoons due to its call?",
-      options: ["Owl", "Indian Cuckoo (Koel)", "Flamingo", "Hornbill"],
-      correct: 1
-    },
-    {
-      question: "Where is the famous Bharatpur Bird Sanctuary located?",
-      options: ["Gujarat", "Rajasthan", "Kerala", "Assam"],
-      correct: 1
-    },
-    {
-      question: "Which bird has a large curved beak and plays an important role in forest seed dispersal?",
-      options: ["Eagle", "Crane", "Hornbill", "Stork"],
-      correct: 2
-    },
-    {
-      question: "What do flamingos mainly feed on in Indian wetlands?",
-      options: ["Fish", "Insects", "Algae and small crustaceans", "Seeds"],
-      correct: 2
-    },
-    {
-      question: "Which bird is often called the \"farmer's friend\" in India?",
-      options: ["Crow", "Owl", "Sparrow", "Pigeon"],
-      correct: 1
+  useEffect(() => {
+    fetchQuiz();
+  }, []);
+
+  const fetchQuiz = async () => {
+    try {
+      setLoading(true);
+      const output = await quizAPI.getPublishedQuizzes();
+      // Assuming output.data.data is the array of quizzes based on standard API response wrapper
+      const quizzes = output.data.data;
+
+      if (quizzes && quizzes.length > 0) {
+        setQuizData(quizzes[0]);
+      }
+    } catch (error) {
+      console.error("Failed to fetch quiz:", error);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
   const handleAnswerSelect = (answerIndex) => {
     setSelectedAnswers({
       ...selectedAnswers,
-      [currentQuestion]: answerIndex
+      [currentQuestion]: answerIndex,
     });
   };
 
   const handleNext = () => {
-    if (currentQuestion < questions.length - 1) {
+    if (quizData && currentQuestion < quizData.questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
     } else {
-      calculateScore();
+      finishQuiz();
     }
   };
 
@@ -82,30 +56,76 @@ const BirdQuiz = () => {
     }
   };
 
-  const calculateScore = () => {
-    setShowResults(true);
-  };
-
   const getScore = () => {
+    if (!quizData) return 0;
     let score = 0;
-    questions.forEach((q, index) => {
-      if (selectedAnswers[index] === q.correct) {
-        score++;
+    quizData.questions.forEach((q, index) => {
+      const selectedIndex = selectedAnswers[index];
+      if (selectedIndex !== undefined) {
+        const selectedOption = q.options[selectedIndex];
+        if (selectedOption === q.correctAnswer) {
+          score++;
+        }
       }
     });
     return score;
   };
 
+  const finishQuiz = async () => {
+    const score = getScore();
+    setShowResults(true);
+
+    if (quizData) {
+      setSubmitting(true);
+      try {
+        await quizAPI.submitQuiz({
+          quizId: quizData._id,
+          userName: participantName,
+          userEmail: participantEmail,
+          score: score,
+          totalQuestions: quizData.questions.length,
+          percentage: Math.round((score / quizData.questions.length) * 100),
+          answers: selectedAnswers,
+        });
+      } catch (error) {
+        console.error("Failed to submit quiz results:", error);
+      } finally {
+        setSubmitting(false);
+      }
+    }
+  };
+
   const handleStartQuiz = () => {
-    if (participantName.trim()) {
+    if (participantName.trim() && participantEmail.trim()) {
       setShowNameInput(false);
     }
   };
 
   const handleDownloadCertificate = () => {
+    if (!quizData) return;
     const score = getScore();
-    generateQuizCertificate(participantName, score, questions.length);
+    generateQuizCertificate(participantName, score, quizData.questions.length);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-2xl font-serif text-amber-600">Loading Quiz...</div>
+      </div>
+    );
+  }
+
+  if (!quizData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-xl font-serif text-gray-600">
+          No quizzes available at the moment.
+        </div>
+      </div>
+    );
+  }
+
+  const questions = quizData.questions;
 
   if (showNameInput) {
     return (
@@ -120,11 +140,9 @@ const BirdQuiz = () => {
           <div className="relative z-10 container mx-auto px-6 h-full flex items-center">
             <div>
               <h1 className="text-5xl md:text-6xl font-serif font-bold text-white mb-4">
-                Bird Knowledge Quiz
+                {quizData.title}
               </h1>
-              <p className="text-xl text-gray-200">
-                Test your knowledge about Indian birds
-              </p>
+              <p className="text-xl text-gray-200">{quizData.description}</p>
             </div>
           </div>
         </div>
@@ -133,26 +151,28 @@ const BirdQuiz = () => {
           <div className="container mx-auto px-6 max-w-md">
             <div className="bg-white rounded-lg shadow-lg p-8">
               <h2 className="text-2xl font-serif font-bold text-gray-800 mb-4 text-center">
-                Enter Your Name
+                Enter Your Details
               </h2>
               <p className="text-gray-600 mb-6 text-center">
-                Please enter your name to start the quiz
+                Please enter your name and email to start the quiz
               </p>
               <input
                 type="text"
                 value={participantName}
                 onChange={(e) => setParticipantName(e.target.value)}
                 placeholder="Your Name"
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-amber-500 mb-4"
+              />
+              <input
+                type="email"
+                value={participantEmail}
+                onChange={(e) => setParticipantEmail(e.target.value)}
+                placeholder="Your Email"
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-amber-500 mb-6"
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter' && participantName.trim()) {
-                    handleStartQuiz();
-                  }
-                }}
               />
               <button
                 onClick={handleStartQuiz}
-                disabled={!participantName.trim()}
+                disabled={!participantName.trim() || !participantEmail.trim()}
                 className="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold px-6 py-3 rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Start Quiz
@@ -209,7 +229,9 @@ const BirdQuiz = () => {
                 </div>
                 <div className="bg-red-50 p-4 rounded-lg">
                   <p className="text-gray-600 mb-1">Incorrect Answers</p>
-                  <p className="text-3xl font-bold text-red-600">{questions.length - score}</p>
+                  <p className="text-3xl font-bold text-red-600">
+                    {questions.length - score}
+                  </p>
                 </div>
               </div>
 
@@ -253,7 +275,7 @@ const BirdQuiz = () => {
         <div className="relative z-10 container mx-auto px-6 h-full flex items-center">
           <div>
             <h1 className="text-5xl md:text-6xl font-serif font-bold text-white mb-4">
-              Bird Knowledge Quiz
+              {quizData.title}
             </h1>
             <p className="text-xl text-gray-200">
               Question {currentQuestion + 1} of {questions.length}
@@ -273,7 +295,7 @@ const BirdQuiz = () => {
             </div>
 
             <h2 className="text-2xl font-serif font-bold text-gray-800 mb-6">
-              {currentQ.question}
+              {currentQ.questionText}
             </h2>
 
             <div className="space-y-4 mb-8">
@@ -281,13 +303,14 @@ const BirdQuiz = () => {
                 <button
                   key={index}
                   onClick={() => handleAnswerSelect(index)}
-                  className={`w-full text-left px-6 py-4 rounded-lg border-2 transition-all duration-300 ${
-                    selectedAnswers[currentQuestion] === index
-                      ? 'bg-amber-500 text-white border-amber-500'
-                      : 'bg-white text-gray-800 border-gray-300 hover:border-amber-300'
-                  }`}
+                  className={`w-full text-left px-6 py-4 rounded-lg border-2 transition-all duration-300 ${selectedAnswers[currentQuestion] === index
+                      ? "bg-amber-500 text-white border-amber-500"
+                      : "bg-white text-gray-800 border-gray-300 hover:border-amber-300"
+                    }`}
                 >
-                  <span className="font-semibold mr-2">{String.fromCharCode(65 + index)})</span>
+                  <span className="font-semibold mr-2">
+                    {String.fromCharCode(65 + index)})
+                  </span>
                   {option}
                 </button>
               ))}
@@ -309,7 +332,7 @@ const BirdQuiz = () => {
                 disabled={selectedAnswers[currentQuestion] === undefined}
                 className="bg-amber-500 hover:bg-amber-600 text-white font-semibold px-6 py-3 rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {currentQuestion === questions.length - 1 ? 'Submit' : 'Next →'}
+                {currentQuestion === questions.length - 1 ? "Submit" : "Next →"}
               </button>
             </div>
           </div>

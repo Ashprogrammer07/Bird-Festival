@@ -2,31 +2,45 @@ import mongoose from "mongoose";
 
 const questionSchema = new mongoose.Schema({
   questionText: {
-    type: String,
-    required: true,
+    en: {
+      type: String,
+      required: true,
+    },
+    hi: {
+      type: String,
+      required: true,
+    },
   },
   options: {
-    type: [String],
+    type: [{
+      en: { type: String, required: true },
+      hi: { type: String, required: true },
+    }],
     required: true,
     validate: [(v) => v.length >= 2, "At least 2 options required"],
   },
   correctAnswer: {
-  type: String,
-  required: true,
-  validate: {
-    validator: function (v) {
-      return this.options.includes(v);
+    type: Number, // Index of correct answer (0-based)
+    required: true,
+    validate: {
+      validator: function (v) {
+        return v >= 0 && v < this.options.length;
+      },
+      message: "Correct answer must be a valid option index",
     },
-    message: "Correct answer must be one of the options",
   },
-},
-
 });
 
 const quizSchema = new mongoose.Schema(
   {
-    title: { type: String, required: true },
-    description: String,
+    title: {
+      en: { type: String, required: true },
+      hi: { type: String, required: true },
+    },
+    description: {
+      en: { type: String },
+      hi: { type: String },
+    },
     difficulty: {
       type: String,
       enum: ["Easy", "Medium", "Hard"],

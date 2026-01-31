@@ -42,10 +42,16 @@ export const adminContactAPI = {
 };
 
 /* ================= PLEDGE ================= */
+/* ================= PLEDGE ================= */
 export const adminPledgeAPI = {
   getAll: () => api.get("/admin/pledges"),
   getById: (id) => api.get(`/admin/pledges/${id}`),
+  create: (data) => api.post("/admin/pledges", data),       // ✅ Create
+  update: (id, data) => api.put(`/admin/pledges/${id}`, data), // ✅ Update
   delete: (id) => api.delete(`/admin/pledges/${id}`),
+  exportCSV: () => api.get("/admin/pledges/export/csv", { responseType: 'blob' }),
+  bulkDelete: (ids) => api.post("/admin/pledges/bulk-delete", { ids }),
+  getAnalytics: () => api.get("/admin/pledges/analytics"),
 };
 
 /* ================= COMPETITIONS ================= */
@@ -75,6 +81,9 @@ export const adminVolunteerAPI = {
   getAll: () => api.get("/admin/volunteers"),
   getById: (id) => api.get(`/admin/volunteers/${id}`),
   delete: (id) => api.delete(`/admin/volunteers/${id}`),
+  exportCSV: () => api.get("/admin/volunteers/export/csv", { responseType: 'blob' }),
+  bulkDelete: (ids) => api.post("/admin/volunteers/bulk-delete", { ids }),
+  getAnalytics: () => api.get("/admin/volunteers/analytics"),
 };
 
 /* ================= READING PROGRESS ================= */

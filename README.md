@@ -6,6 +6,7 @@ A complete, production-ready website for the Rajasthan Birds Festival built usin
 
 This website celebrates the incredible avian diversity of Rajasthan, India. It features:
 - Beautiful hero landing page with full-screen background
+- **🌍 Full bilingual support (English & Hindi)** - Dynamic content in both languages
 - Festival information and schedule management
 - Contact form with backend integration
 - Downloadable e-book for bird identification
@@ -213,6 +214,98 @@ db.ebooks.insertOne({
 
 ### Health Check
 - `GET /api/health` - Check API status
+
+## 🌍 Internationalization (i18n)
+
+### Supported Languages
+- **English (en)** - Default language
+- **हिंदी (hi)** - Hindi language support
+
+### Bilingual Content
+All dynamic content is stored in bilingual format in the database:
+- Festival information (title, description, location, mission, vision, about)
+- Schedules (day titles, activities, locations, descriptions)
+- Gallery images (titles, categories)
+- E-books (titles, descriptions, authors)
+- Quizzes (questions, options)
+- Resource persons (designations, organizations, expertise, bios, topics)
+
+### API Usage with Language Parameter
+
+All GET endpoints support an optional `lang` query parameter:
+
+```bash
+# Get content in English
+GET /api/schedule?lang=en
+
+# Get content in Hindi
+GET /api/festival?lang=hi
+
+# Get full bilingual data (for admin)
+GET /api/schedule
+```
+
+### Response Format
+
+**With language parameter:**
+```json
+{
+  "title": "Bird Watching",
+  "description": "A wonderful event"
+}
+```
+
+**Without language parameter (full bilingual):**
+```json
+{
+  "title": {
+    "en": "Bird Watching",
+    "hi": "पक्षी दर्शन"
+  },
+  "description": {
+    "en": "A wonderful event",
+    "hi": "एक अद्भुत कार्यक्रम"
+  }
+}
+```
+
+### Frontend Integration
+
+The frontend uses `LanguageContext` to manage the current language:
+
+```javascript
+import { useLanguage } from './context/LanguageContext';
+
+function MyComponent() {
+  const { language, t } = useLanguage();
+  
+  // Fetch localized data
+  fetch(`/api/schedule?lang=${language}`)
+    .then(res => res.json())
+    .then(data => console.log(data));
+}
+```
+
+### Data Migration
+
+To migrate existing monolingual data to bilingual format:
+
+```bash
+cd server
+node migrate-to-bilingual.js
+```
+
+⚠️ **Important**: Backup your database before running the migration script!
+
+### Documentation
+
+For detailed information about the internationalization implementation:
+- **Full Guide**: `INTERNATIONALIZATION.md`
+- **Quick Start**: `QUICK_START.md`
+- **Architecture**: `ARCHITECTURE.md`
+- **Implementation Summary**: `IMPLEMENTATION_SUMMARY.md`
+- **Checklist**: `CHECKLIST.md`
+
 
 ## 🎨 Features
 

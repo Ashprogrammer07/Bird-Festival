@@ -1,21 +1,24 @@
+
 import { useEffect, useState } from "react";
 import { adminScheduleAPI } from "../../services/adminApi";
-import { 
-  Calendar, 
-  Plus, 
-  Trash2, 
-  Loader2, 
-  CalendarDays, 
+import {
+  Calendar,
+  Plus,
+  Trash2,
+  Loader2,
+  CalendarDays,
   AlertCircle,
   Hash,
   Type
 } from "lucide-react";
+import { useLanguage } from "../../context/LanguageContext";
 
 const ScheduleAdmin = () => {
   const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const { t } = useLanguage();
 
   const [form, setForm] = useState({
     day: "",
@@ -49,10 +52,10 @@ const ScheduleAdmin = () => {
   };
 
   const validateForm = () => {
-    if (!form.day) return "Day number is required.";
+    if (!form.day) return t('common.required');
     if (isNaN(form.day)) return "Day must be a number.";
-    if (!form.date) return "Date is required.";
-    if (!form.title.trim()) return "Title is required.";
+    if (!form.date) return t('common.required');
+    if (!form.title.trim()) return t('common.required');
     return null;
   };
 
@@ -82,7 +85,7 @@ const ScheduleAdmin = () => {
   };
 
   const deleteSchedule = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this schedule day? This cannot be undone.")) return;
+    if (!window.confirm(t('common.delete') + "?")) return;
     try {
       await adminScheduleAPI.delete(id);
       setSchedules(schedules.filter((s) => s._id !== id));
@@ -94,9 +97,9 @@ const ScheduleAdmin = () => {
   // --- Render Helpers ---
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
-      weekday: 'short', 
-      year: 'numeric', 
-      month: 'short', 
+      weekday: 'short',
+      year: 'numeric',
+      month: 'short',
       day: 'numeric'
     });
   };
@@ -115,15 +118,15 @@ const ScheduleAdmin = () => {
         <div className="bg-green-100 p-2 rounded-lg">
           <CalendarDays className="w-6 h-6 text-green-700" />
         </div>
-        <h2 className="text-2xl font-bold text-gray-800">Schedule Management</h2>
+        <h2 className="text-2xl font-bold text-gray-800">{t('admin.schedule')}</h2>
       </div>
 
       {/* --- ADD SCHEDULE FORM --- */}
       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-8">
         <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
-          Add New Festival Day
+          {t('common.edit')} / {t('common.save')}
         </h3>
-        
+
         {error && (
           <div className="mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg flex items-center gap-2 text-sm">
             <AlertCircle className="w-4 h-4" />
@@ -132,10 +135,10 @@ const ScheduleAdmin = () => {
         )}
 
         <form onSubmit={addSchedule} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-          
+
           {/* Day Input */}
           <div className="md:col-span-2">
-            <label className="block text-xs font-medium text-gray-700 mb-1">Day #</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">{t('schedule.day')} #</label>
             <div className="relative">
               <Hash className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
               <input
@@ -151,7 +154,7 @@ const ScheduleAdmin = () => {
 
           {/* Date Input */}
           <div className="md:col-span-3">
-            <label className="block text-xs font-medium text-gray-700 mb-1">Date</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">{t('home.dates')}</label>
             <div className="relative">
               <Calendar className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
               <input
@@ -166,7 +169,7 @@ const ScheduleAdmin = () => {
 
           {/* Title Input */}
           <div className="md:col-span-5">
-            <label className="block text-xs font-medium text-gray-700 mb-1">Theme / Title</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Title</label>
             <div className="relative">
               <Type className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
               <input
@@ -188,7 +191,7 @@ const ScheduleAdmin = () => {
               className="w-full bg-green-700 hover:bg-green-800 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-              Add Day
+              {t('common.save')}
             </button>
           </div>
         </form>
@@ -200,11 +203,11 @@ const ScheduleAdmin = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Day</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('schedule.day')}</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('home.dates')}</th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Title</th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('common.delete')}</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -212,7 +215,7 @@ const ScheduleAdmin = () => {
                 <tr>
                   <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
                     <CalendarDays className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                    <p>No schedules found. Add one above!</p>
+                    <p>No schedules found.</p>
                   </td>
                 </tr>
               ) : (
@@ -230,9 +233,8 @@ const ScheduleAdmin = () => {
                       {s.title}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        s.isActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                      }`}>
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${s.isActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                        }`}>
                         {s.isActive ? "Active" : "Inactive"}
                       </span>
                     </td>

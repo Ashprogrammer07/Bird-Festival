@@ -1,5 +1,6 @@
 import Quiz from "../models/Quiz.js";
 import QuizSubmission from "../models/QuizSubmission.js";
+import { toLocalizedObjects, toLocalizedObject } from '../utils/i18nHelper.js';
 
 /* ================= PUBLIC ================= */
 
@@ -12,6 +13,17 @@ export const getPublishedQuizzes = async (req, res) => {
     const quizzes = await Quiz.find({ isPublished: true }).sort({
       createdAt: -1,
     });
+
+    // Check if language parameter is provided for localization
+    const lang = req.query.lang;
+
+    if (lang && ['en', 'hi'].includes(lang)) {
+      const localizedQuizzes = toLocalizedObjects(quizzes, lang);
+      return res.json({
+        success: true,
+        data: localizedQuizzes,
+      });
+    }
 
     res.json({
       success: true,
@@ -40,6 +52,17 @@ export const getQuizById = async (req, res) => {
       return res.status(404).json({
         success: false,
         message: "Quiz not found",
+      });
+    }
+
+    // Check if language parameter is provided for localization
+    const lang = req.query.lang;
+
+    if (lang && ['en', 'hi'].includes(lang)) {
+      const localizedQuiz = toLocalizedObject(quiz, lang);
+      return res.json({
+        success: true,
+        data: localizedQuiz,
       });
     }
 

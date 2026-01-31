@@ -1,27 +1,38 @@
-import { useState, useEffect, useRef } from 'react';
+
+import { useState, useEffect } from 'react';
 import { quizAPI } from '../services/api';
+import { generateQuizCertificate } from '../utils/certificateGenerator';
+import { useLanguage } from '../context/LanguageContext';
 
 const NatureQuiz = () => {
+  const { t, language } = useLanguage();
   const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Quiz Flow States
   const [selectedQuiz, setSelectedQuiz] = useState(null);
+  const [showStartForm, setShowStartForm] = useState(false);
+  // unused state: quizStarted, can be derived from showStartForm=false and selectedQuiz!=null
+
+  // User Data
+  const [userName, setUserName] = useState('');
+  const [userEmail, setUserEmail] = useState('');
+
+  // Answers & Results
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState(null);
-  
-  // New States for Certificate
-  const [userName, setUserName] = useState('');
-  const canvasRef = useRef(null);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     fetchQuizzes();
-  }, []);
+  }, [language]);
 
   const fetchQuizzes = async () => {
     try {
       setLoading(true);
-      const response = await quizAPI.getPublishedQuizzes();
+      const response = await quizAPI.getPublishedQuizzes(language);
       setQuizzes(response.data.data || []);
       setError(null);
     } catch (err) {
@@ -34,10 +45,18 @@ const NatureQuiz = () => {
 
   const handleQuizSelect = (quiz) => {
     setSelectedQuiz(quiz);
+    setShowStartForm(true); // Show form after selecting quiz
     setAnswers({});
     setSubmitted(false);
     setScore(null);
-    setUserName(''); // Reset name on new quiz
+    setUserName('');
+    setUserEmail('');
+  };
+
+  const handleStartQuiz = () => {
+    if (userName.trim() && userEmail.trim()) {
+      setShowStartForm(false);
+    }
   };
 
   const handleAnswerChange = (questionId, answer) => {
@@ -52,7 +71,9 @@ const NatureQuiz = () => {
 
     let correctCount = 0;
     selectedQuiz.questions.forEach((question) => {
-      if (answers[question._id] === question.correctAnswer) {
+      // Find index of selected answer string in options array
+      const selectedIndex = question.options.indexOf(answers[question._id]);
+      if (selectedIndex === question.correctAnswer) {
         correctCount++;
       }
     });
@@ -67,101 +88,39 @@ const NatureQuiz = () => {
 
     setScore(result);
     setSubmitted(true);
+    setSubmitting(true);
 
     try {
       await quizAPI.submitQuiz({
         quizId: selectedQuiz._id,
+        userName,
+        userEmail,
         answers,
         score: result.correct,
         totalQuestions: result.total,
         percentage: result.percentage,
       });
     } catch (err) {
-      console.warn("Quiz submission failed (UI not affected)", err);
+      console.warn("Quiz submission failed", err);
+    } finally {
+      setSubmitting(false);
     }
   };
 
   const resetQuiz = () => {
     setSelectedQuiz(null);
+    setShowStartForm(false);
     setAnswers({});
     setSubmitted(false);
     setScore(null);
     setUserName('');
+    setUserEmail('');
   };
 
-  // --- CERTIFICATE GENERATION LOGIC ---
-  const downloadCertificate = () => {
-    if (!userName.trim()) {
-      alert("Please enter your name to generate the certificate.");
-      return;
+  const handleDownloadCertificate = () => {
+    if (score && selectedQuiz) {
+      generateQuizCertificate(userName, score.correct, score.total);
     }
-
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-
-    // 1. Clear Canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // 2. Draw Background
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // 3. Draw Border
-    ctx.lineWidth = 10;
-    ctx.strokeStyle = '#f59e0b'; // Amber-500
-    ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
-
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = '#166534'; // Green-800
-    ctx.strokeRect(35, 35, canvas.width - 70, canvas.height - 70);
-
-    // 4. Draw Header Text
-    ctx.font = 'bold 40px Serif';
-    ctx.fillStyle = '#166534'; // Green-800
-    ctx.textAlign = 'center';
-    ctx.fillText('Certificate of Completion', canvas.width / 2, 120);
-
-    // 5. Draw Subtext
-    ctx.font = '20px Sans-Serif';
-    ctx.fillStyle = '#555';
-    ctx.fillText('This certifies that', canvas.width / 2, 180);
-
-    // 6. Draw User Name
-    ctx.font = 'bold italic 50px Serif';
-    ctx.fillStyle = '#000';
-    ctx.fillText(userName, canvas.width / 2, 250);
-    
-    // Draw line under name
-    ctx.beginPath();
-    ctx.moveTo(canvas.width / 2 - 200, 260);
-    ctx.lineTo(canvas.width / 2 + 200, 260);
-    ctx.strokeStyle = '#ccc';
-    ctx.stroke();
-
-    // 7. Draw Achievement Details
-    ctx.font = '20px Sans-Serif';
-    ctx.fillStyle = '#555';
-    ctx.fillText('Has successfully completed the', canvas.width / 2, 320);
-    
-    ctx.font = 'bold 30px Serif';
-    ctx.fillStyle = '#f59e0b'; // Amber
-    ctx.fillText(selectedQuiz.title, canvas.width / 2, 360);
-
-    ctx.font = '20px Sans-Serif';
-    ctx.fillStyle = '#555';
-    ctx.fillText(`With a score of ${score.percentage}%`, canvas.width / 2, 410);
-
-    // 8. Date
-    const date = new Date().toLocaleDateString();
-    ctx.font = 'italic 16px Sans-Serif';
-    ctx.fillStyle = '#999';
-    ctx.fillText(`Date: ${date}`, canvas.width / 2, 500);
-
-    // --- TRIGGER DOWNLOAD ---
-    const link = document.createElement('a');
-    link.download = `Certificate_${userName.replace(/\s+/g, '_')}.png`;
-    link.href = canvas.toDataURL('image/png');
-    link.click();
   };
 
   if (loading) {
@@ -188,18 +147,19 @@ const NatureQuiz = () => {
     );
   }
 
+  // 1. SELECT QUIZ SCREEN
   if (!selectedQuiz) {
     return (
       <div className="max-w-4xl mx-auto">
         <div className="bg-white rounded-xl shadow-lg p-8">
-          <h2 className="text-2xl md:text-3xl font-serif font-bold mb-4 md:mb-6 text-center">Nature Quiz</h2>
+          <h2 className="text-2xl md:text-3xl font-serif font-bold mb-4 md:mb-6 text-center">{t('quizSection.title')}</h2>
           <p className="text-gray-600 text-center mb-6 md:mb-8 text-sm md:text-base">
-            Test your knowledge about birds and nature. Select a quiz to begin!
+            {t('quizSection.subtitle')}
           </p>
 
           {quizzes.length === 0 ? (
             <div className="text-center py-8 md:py-12">
-              <p className="text-gray-500 text-base md:text-lg">No quizzes available at the moment.</p>
+              <p className="text-gray-500 text-base md:text-lg">{t('quizSection.noQuizzes')}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
@@ -226,22 +186,65 @@ const NatureQuiz = () => {
     );
   }
 
+  // 2. ENTER DETAILS SCREEN
+  if (showStartForm) {
+    return (
+      <div className="max-w-md mx-auto">
+        <div className="bg-white rounded-xl shadow-lg p-8">
+          <button onClick={() => setSelectedQuiz(null)} className="text-gray-500 hover:text-gray-700 mb-4">
+            ← Back to Quizzes
+          </button>
+          <h2 className="text-2xl font-serif font-bold mb-2 text-center">{selectedQuiz.title}</h2>
+          <p className="text-gray-600 mb-6 text-center">Enter your details to start the quiz</p>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+              <input
+                type="text"
+                value={userName}
+                onChange={(e) => setUserName(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                placeholder="John Doe"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+              <input
+                type="email"
+                value={userEmail}
+                onChange={(e) => setUserEmail(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                placeholder="john@example.com"
+              />
+            </div>
+            <button
+              onClick={handleStartQuiz}
+              disabled={!userName.trim() || !userEmail.trim()}
+              className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-6 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Start Quiz
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 3. QUIZ & RESULTS SCREEN
   return (
     <div className="max-w-4xl mx-auto px-4 md:px-0">
-      {/* Hidden Canvas for Certificate Generation */}
-      <canvas ref={canvasRef} width={800} height={600} className="hidden" />
-
       <div className="bg-white rounded-xl shadow-lg p-4 md:p-8">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 md:mb-6 gap-4">
           <div className="flex-1">
             <h2 className="text-2xl md:text-3xl font-serif font-bold">{selectedQuiz.title}</h2>
             <p className="text-gray-600 mt-2 text-sm md:text-base">{selectedQuiz.description}</p>
           </div>
-          <button onClick={resetQuiz} className="text-gray-600 hover:text-gray-800 transition">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+          {!submitted && (
+            <button onClick={resetQuiz} className="text-gray-600 hover:text-gray-800 transition">
+              Cancel
+            </button>
+          )}
         </div>
 
         {!submitted ? (
@@ -256,11 +259,10 @@ const NatureQuiz = () => {
                     {question.options?.map((option, optIndex) => (
                       <label
                         key={optIndex}
-                        className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition ${
-                          answers[question._id] === option
-                            ? 'border-amber-500 bg-amber-50'
-                            : 'border-gray-200 hover:border-gray-300'
-                        }`}
+                        className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition ${answers[question._id] === option
+                          ? 'border-amber-500 bg-amber-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                          }`}
                       >
                         <input
                           type="radio"
@@ -280,10 +282,10 @@ const NatureQuiz = () => {
 
             <button
               onClick={handleSubmit}
-              disabled={Object.keys(answers).length !== selectedQuiz.questions?.length}
+              disabled={Object.keys(answers).length !== selectedQuiz.questions?.length || submitting}
               className="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl text-sm md:text-base"
             >
-              Submit Quiz
+              {submitting ? "Submitting..." : "Submit Quiz"}
             </button>
           </>
         ) : (
@@ -294,39 +296,21 @@ const NatureQuiz = () => {
                 You scored {score.correct} out of {score.total} questions
               </p>
             </div>
-            
-            {/* --- CERTIFICATE SECTION START --- */}
-            {score.percentage >= 50 && ( // Only show if they passed (optional condition)
-              <div className="bg-green-50 border border-green-200 rounded-xl p-6 mb-8 max-w-md mx-auto">
-                <h3 className="text-lg font-bold text-green-800 mb-2">🎉 Claim Your Certificate</h3>
-                <p className="text-sm text-green-700 mb-4">Enter your name as you want it to appear on the certificate.</p>
-                
-                <div className="flex flex-col gap-3">
-                  <input
-                    type="text"
-                    placeholder="Enter Full Name"
-                    value={userName}
-                    onChange={(e) => setUserName(e.target.value)}
-                    className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 w-full"
-                  />
-                  <button
-                    onClick={downloadCertificate}
-                    className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition flex items-center justify-center gap-2"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    Download Certificate
-                  </button>
-                </div>
-              </div>
-            )}
-            {/* --- CERTIFICATE SECTION END --- */}
+
+            <div className="flex justify-center gap-4 mb-8">
+              <button
+                onClick={handleDownloadCertificate}
+                className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition shadow flex items-center gap-2"
+              >
+                <span>📜</span> Download Certificate
+              </button>
+            </div>
 
             <div className="mt-8 space-y-4 text-left">
               {selectedQuiz.questions?.map((question, index) => {
                 const userAnswer = answers[question._id];
-                const isCorrect = userAnswer === question.correctAnswer;
+                const selectedIndex = question.options.indexOf(userAnswer);
+                const isCorrect = selectedIndex === question.correctAnswer;
                 return (
                   <div
                     key={question._id}
@@ -348,7 +332,7 @@ const NatureQuiz = () => {
                       {!isCorrect && (
                         <p>
                           <span className="font-semibold">Correct answer:</span>{' '}
-                          <span className="text-green-700">{question.correctAnswer}</span>
+                          <span className="text-green-700">{question.options[question.correctAnswer]}</span>
                         </p>
                       )}
                     </div>

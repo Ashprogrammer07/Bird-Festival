@@ -17,24 +17,24 @@ export const registerResourcePerson = async (req, res) => {
     } = req.body;
 
     // Validate required fields
-    const requiredFields = { 
-      name, 
-      designation, 
-      organization, 
-      email, 
-      phone, 
-      expertise, 
-      experience, 
-      qualifications, 
-      topics, 
-      availability 
+    const requiredFields = {
+      name,
+      designation,
+      organization,
+      email,
+      phone,
+      expertise,
+      experience,
+      qualifications,
+      topics,
+      availability
     };
     const missingFields = Object.entries(requiredFields)
       .filter(([key, value]) => !value || (typeof value === 'string' && value.trim() === ''))
       .map(([key]) => key);
 
     if (missingFields.length > 0) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         message: `Missing required fields: ${missingFields.join(', ')}`,
       });
     }
@@ -66,9 +66,20 @@ export const registerResourcePerson = async (req, res) => {
 export const getAllResourcePersons = async (req, res) => {
   try {
     const resourcePersons = await ResourcePerson.find().sort({ createdAt: -1 });
+
+    // Check if language parameter is provided for localization
+    const lang = req.query.lang;
+
+    if (lang && ['en', 'hi'].includes(lang)) {
+      const { toLocalizedObjects } = await import('../utils/i18nHelper.js');
+      const localizedPersons = toLocalizedObjects(resourcePersons, lang);
+      return res.json(localizedPersons);
+    }
+
     res.json(resourcePersons);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
 

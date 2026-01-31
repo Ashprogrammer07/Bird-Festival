@@ -1,7 +1,7 @@
 import jsPDF from 'jspdf'
 
 // Generate Pledge Certificate
-export const generatePledgeCertificate = (name) => {
+export const generatePledgeCertificate = (name, pledgeType = 'general') => {
   const doc = new jsPDF({
     orientation: 'landscape',
     unit: 'mm',
@@ -22,17 +22,21 @@ export const generatePledgeCertificate = (name) => {
   doc.setLineWidth(1)
   doc.rect(15, 15, 267, 180)
 
+  // Title Logic
+  const title = pledgeType === 'student' ? 'STUDENT BIRD PLEDGE' : 'CERTIFICATE OF PLEDGE';
+  const subTitle = pledgeType === 'student' ? 'Junior Guardian of Nature' : 'Bird Festival - Celebrating Nature';
+
   // Title
   doc.setFontSize(36)
   doc.setTextColor(45, 80, 22) // Primary green
   doc.setFont('helvetica', 'bold')
-  doc.text('CERTIFICATE OF PLEDGE', 148.5, 50, { align: 'center' })
+  doc.text(title, 148.5, 50, { align: 'center' })
 
   // Subtitle
   doc.setFontSize(20)
   doc.setTextColor(74, 124, 42)
   doc.setFont('helvetica', 'normal')
-  doc.text('Bird Festival - Celebrating Nature', 148.5, 65, { align: 'center' })
+  doc.text(subTitle, 148.5, 65, { align: 'center' })
 
   // Main text
   doc.setFontSize(16)
@@ -46,18 +50,24 @@ export const generatePledgeCertificate = (name) => {
   doc.setFont('helvetica', 'bold')
   doc.text(name.toUpperCase(), 148.5, 110, { align: 'center' })
 
-  // Pledge text
+  // Pledge text logic
   doc.setFontSize(14)
   doc.setTextColor(26, 26, 26)
   doc.setFont('helvetica', 'normal')
-  const pledgeText = 'has taken the Nature Pledge to protect and preserve our natural heritage, to respect all living creatures and their habitats, and to work towards a sustainable future for generations to come.'
+
+  let pledgeText = 'has taken the Nature Pledge to protect and preserve our natural heritage, to respect all living creatures and their habitats, and to work towards a sustainable future for generations to come.';
+
+  if (pledgeType === 'student') {
+    pledgeText = 'has solemnly pledged to be a young guardian of nature, to observe and protect birds in their surroundings, to not disturb nests, and to encourage others to keep the environment bird-friendly.';
+  }
+
   doc.text(pledgeText, 148.5, 130, { align: 'center', maxWidth: 250 })
 
   // Date
-  const date = new Date().toLocaleDateString('en-US', { 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
+  const date = new Date().toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
   })
   doc.setFontSize(12)
   doc.setTextColor(102, 102, 102)
@@ -68,7 +78,7 @@ export const generatePledgeCertificate = (name) => {
   doc.setLineWidth(0.5)
   doc.line(50, 180, 100, 180)
   doc.line(197, 180, 247, 180)
-  
+
   doc.setFontSize(10)
   doc.setTextColor(102, 102, 102)
   doc.text('Organizer', 75, 185, { align: 'center' })
@@ -141,10 +151,10 @@ export const generateQuizCertificate = (name, score, totalQuestions) => {
   doc.text(scoreText, 148.5, 130, { align: 'center', maxWidth: 250 })
 
   // Date
-  const date = new Date().toLocaleDateString('en-US', { 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
+  const date = new Date().toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
   })
   doc.setFontSize(12)
   doc.setTextColor(102, 102, 102)
@@ -155,7 +165,7 @@ export const generateQuizCertificate = (name, score, totalQuestions) => {
   doc.setLineWidth(0.5)
   doc.line(50, 180, 100, 180)
   doc.line(197, 180, 247, 180)
-  
+
   doc.setFontSize(10)
   doc.setTextColor(102, 102, 102)
   doc.text('Organizer', 75, 185, { align: 'center' })
@@ -225,16 +235,16 @@ export const generateEbookCertificate = (name, totalPages, timeSpent) => {
   doc.setFont('helvetica', 'normal')
   const hours = Math.floor(timeSpent / 3600)
   const minutes = Math.floor((timeSpent % 3600) / 60)
-  const timeText = timeSpent > 0 
+  const timeText = timeSpent > 0
     ? `has successfully completed reading the Festival E-Book (${totalPages} pages) in ${hours > 0 ? `${hours} hour${hours > 1 ? 's' : ''} and ` : ''}${minutes} minute${minutes !== 1 ? 's' : ''}.`
     : `has successfully completed reading the Festival E-Book (${totalPages} pages).`
   doc.text(timeText, 148.5, 130, { align: 'center', maxWidth: 250 })
 
   // Date
-  const date = new Date().toLocaleDateString('en-US', { 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
+  const date = new Date().toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
   })
   doc.setFontSize(12)
   doc.setTextColor(102, 102, 102)
@@ -245,7 +255,7 @@ export const generateEbookCertificate = (name, totalPages, timeSpent) => {
   doc.setLineWidth(0.5)
   doc.line(50, 180, 100, 180)
   doc.line(197, 180, 247, 180)
-  
+
   doc.setFontSize(10)
   doc.setTextColor(102, 102, 102)
   doc.text('Organizer', 75, 185, { align: 'center' })

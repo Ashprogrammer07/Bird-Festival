@@ -1,7 +1,10 @@
+
 import { useState } from 'react';
 import { resourcePersonAPI } from '../services/api';
+import { useLanguage } from '../context/LanguageContext';
 
 const ResourcePersonRegistration = () => {
+  const { t } = useLanguage();
   const [formData, setFormData] = useState({
     name: '',
     designation: '',
@@ -36,7 +39,7 @@ const ResourcePersonRegistration = () => {
 
     try {
       await resourcePersonAPI.register(formData);
-    setSubmitted(true);
+      setSubmitted(true);
       setFormData({
         name: '',
         designation: '',
@@ -54,7 +57,7 @@ const ResourcePersonRegistration = () => {
         setSubmitted(false);
       }, 5000);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to submit registration. Please try again.');
+      setError(t('contact.error'));
     } finally {
       setLoading(false);
     }
@@ -73,7 +76,7 @@ const ResourcePersonRegistration = () => {
           <div className="relative z-10 container mx-auto px-4 md:px-6 h-full flex items-center">
             <div>
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white mb-2 md:mb-4">
-                Registration Successful!
+                {t('registration.successTitle')}
               </h1>
             </div>
           </div>
@@ -86,13 +89,10 @@ const ResourcePersonRegistration = () => {
                 <span className="text-3xl md:text-4xl text-white">✓</span>
               </div>
               <h2 className="text-xl md:text-2xl font-serif font-bold text-gray-800 mb-3 md:mb-4">
-                Thank You!
+                {t('registration.thankYou')}
               </h2>
               <p className="text-gray-600 mb-2">
-                Thank you for your interest in being a Resource Person.
-              </p>
-              <p className="text-gray-600">
-                We'll review your application and get back to you soon.
+                {t('registration.thankYouRes')}
               </p>
             </div>
           </div>
@@ -113,10 +113,10 @@ const ResourcePersonRegistration = () => {
         <div className="relative z-10 container mx-auto px-4 md:px-6 h-full flex items-center">
           <div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white mb-2 md:mb-4">
-              Resource Person Registration
+              {t('registration.resourceTitle')}
             </h1>
             <p className="text-base md:text-lg lg:text-xl text-gray-200">
-              Share your expertise and inspire others
+              {t('registration.toolsDesc')}
             </p>
           </div>
         </div>
@@ -133,12 +133,12 @@ const ResourcePersonRegistration = () => {
             {/* Personal & Professional Information */}
             <div className="mb-6 md:mb-8">
               <h2 className="text-xl md:text-2xl font-serif font-bold text-gray-800 mb-4 md:mb-6 pb-2 border-b-2 border-gray-200">
-                Personal & Professional Information
+                {t('registration.personalInfo')}
               </h2>
-              
+
               <div className="mb-4">
                 <label htmlFor="name" className="block text-gray-700 font-semibold mb-2 text-sm md:text-base">
-                  Full Name *
+                  {t('registration.fullName')} *
                 </label>
                 <input
                   type="text"
@@ -147,7 +147,7 @@ const ResourcePersonRegistration = () => {
                   value={formData.name}
                   onChange={handleChange}
                   required
-                  placeholder="Enter your full name"
+                  placeholder={t('registration.fullName')}
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-amber-500"
                 />
               </div>
@@ -155,7 +155,7 @@ const ResourcePersonRegistration = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
                   <label htmlFor="designation" className="block text-gray-700 font-semibold mb-2 text-sm md:text-base">
-                    Designation/Title *
+                    {t('registration.designation')} *
                   </label>
                   <input
                     type="text"
@@ -164,14 +164,14 @@ const ResourcePersonRegistration = () => {
                     value={formData.designation}
                     onChange={handleChange}
                     required
-                    placeholder="e.g., Professor, Researcher, Conservationist"
+                    placeholder="e.g., Professor, Researcher"
                     className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-amber-500"
                   />
                 </div>
 
                 <div>
                   <label htmlFor="organization" className="block text-gray-700 font-semibold mb-2 text-sm md:text-base">
-                    Organization/Institution *
+                    {t('registration.organization')} *
                   </label>
                   <input
                     type="text"
@@ -180,7 +180,7 @@ const ResourcePersonRegistration = () => {
                     value={formData.organization}
                     onChange={handleChange}
                     required
-                    placeholder="Your current organization"
+                    placeholder={t('registration.organization')}
                     className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-amber-500"
                   />
                 </div>
@@ -188,7 +188,7 @@ const ResourcePersonRegistration = () => {
 
               <div>
                 <label htmlFor="expertise" className="block text-gray-700 font-semibold mb-2">
-                  Area of Expertise *
+                  {t('registration.expertise')} *
                 </label>
                 <input
                   type="text"
@@ -197,7 +197,7 @@ const ResourcePersonRegistration = () => {
                   value={formData.expertise}
                   onChange={handleChange}
                   required
-                  placeholder="e.g., Ornithology, Wildlife Conservation, Environmental Science"
+                  placeholder="e.g., Ornithology, Wildlife"
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-amber-500"
                 />
               </div>
@@ -206,13 +206,13 @@ const ResourcePersonRegistration = () => {
             {/* Contact Information */}
             <div className="mb-6 md:mb-8">
               <h2 className="text-xl md:text-2xl font-serif font-bold text-gray-800 mb-4 md:mb-6 pb-2 border-b-2 border-gray-200">
-                Contact Information
+                {t('registration.contactInfo')}
               </h2>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="email" className="block text-gray-700 font-semibold mb-2 text-sm md:text-base">
-                    Email Address *
+                    {t('registration.email')} *
                   </label>
                   <input
                     type="email"
@@ -221,14 +221,14 @@ const ResourcePersonRegistration = () => {
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    placeholder="your.email@example.com"
+                    placeholder="example@email.com"
                     className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-amber-500"
                   />
                 </div>
 
                 <div>
                   <label htmlFor="phone" className="block text-gray-700 font-semibold mb-2">
-                    Phone Number *
+                    {t('registration.phone')} *
                   </label>
                   <input
                     type="tel"
@@ -237,7 +237,7 @@ const ResourcePersonRegistration = () => {
                     value={formData.phone}
                     onChange={handleChange}
                     required
-                    placeholder="+1234567890"
+                    placeholder="+91..."
                     className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-amber-500"
                   />
                 </div>
@@ -247,12 +247,12 @@ const ResourcePersonRegistration = () => {
             {/* Qualifications & Experience */}
             <div className="mb-6 md:mb-8">
               <h2 className="text-xl md:text-2xl font-serif font-bold text-gray-800 mb-4 md:mb-6 pb-2 border-b-2 border-gray-200">
-                Qualifications & Experience
+                {t('registration.qualifications')}
               </h2>
-              
+
               <div className="mb-4">
                 <label htmlFor="qualifications" className="block text-gray-700 font-semibold mb-2">
-                  Educational Qualifications *
+                  {t('registration.eduQual')} *
                 </label>
                 <textarea
                   id="qualifications"
@@ -261,14 +261,14 @@ const ResourcePersonRegistration = () => {
                   onChange={handleChange}
                   required
                   rows="3"
-                  placeholder="List your degrees, certifications, and relevant qualifications"
+                  placeholder=""
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-amber-500"
                 />
               </div>
 
               <div className="mb-4">
                 <label htmlFor="experience" className="block text-gray-700 font-semibold mb-2">
-                  Professional Experience *
+                  {t('registration.profExp')} *
                 </label>
                 <textarea
                   id="experience"
@@ -277,14 +277,14 @@ const ResourcePersonRegistration = () => {
                   onChange={handleChange}
                   required
                   rows="4"
-                  placeholder="Describe your professional experience, years of experience, notable achievements"
+                  placeholder=""
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-amber-500"
                 />
               </div>
 
               <div>
                 <label htmlFor="bio" className="block text-gray-700 font-semibold mb-2">
-                  Brief Biography
+                  {t('registration.bio')}
                 </label>
                 <textarea
                   id="bio"
@@ -292,7 +292,7 @@ const ResourcePersonRegistration = () => {
                   value={formData.bio}
                   onChange={handleChange}
                   rows="4"
-                  placeholder="A brief biography about yourself (optional)"
+                  placeholder=""
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-amber-500"
                 />
               </div>
@@ -301,12 +301,12 @@ const ResourcePersonRegistration = () => {
             {/* Session Details */}
             <div className="mb-6 md:mb-8">
               <h2 className="text-xl md:text-2xl font-serif font-bold text-gray-800 mb-4 md:mb-6 pb-2 border-b-2 border-gray-200">
-                Session Details
+                {t('registration.sessionDetails')}
               </h2>
-              
+
               <div className="mb-4">
                 <label htmlFor="topics" className="block text-gray-700 font-semibold mb-2">
-                  Topics You Can Present On *
+                  {t('registration.topics')} *
                 </label>
                 <textarea
                   id="topics"
@@ -315,14 +315,14 @@ const ResourcePersonRegistration = () => {
                   onChange={handleChange}
                   required
                   rows="4"
-                  placeholder="List the topics or themes you can present on or conduct sessions about"
+                  placeholder=""
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-amber-500"
                 />
               </div>
 
               <div>
                 <label htmlFor="availability" className="block text-gray-700 font-semibold mb-2">
-                  Availability *
+                  {t('registration.availability')} *
                 </label>
                 <textarea
                   id="availability"
@@ -331,7 +331,7 @@ const ResourcePersonRegistration = () => {
                   onChange={handleChange}
                   required
                   rows="3"
-                  placeholder="Please mention your availability dates and preferred time slots"
+                  placeholder=""
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-amber-500"
                 />
               </div>
@@ -344,7 +344,7 @@ const ResourcePersonRegistration = () => {
                 disabled={loading}
                 className="bg-amber-500 hover:bg-amber-600 text-white font-semibold px-8 py-3 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'Submitting...' : '📚 Submit Registration'}
+                {loading ? t('common.loading') : `📚 ${t('registration.submitRes')}`}
               </button>
               <button
                 type="button"
@@ -363,7 +363,7 @@ const ResourcePersonRegistration = () => {
                 })}
                 className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold px-6 py-3 rounded-lg transition-all duration-300"
               >
-                Reset Form
+                {t('registration.reset')}
               </button>
             </div>
           </form>

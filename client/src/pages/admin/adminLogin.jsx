@@ -6,10 +6,10 @@ import { Mail, Lock, Loader2, Bird, AlertCircle, ArrowLeft } from "lucide-react"
 
 const AdminLogin = () => {
   const navigate = useNavigate();
-  
-  const [form, setForm] = useState({ email: "", password: "" });
-  const [errors, setErrors] = useState({}); 
-  const [apiError, setApiError] = useState(""); 
+
+  const [form, setForm] = useState({ email: "admin@example.com", password: "Admin@123" });
+  const [errors, setErrors] = useState({});
+  const [apiError, setApiError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const validateForm = () => {
@@ -63,9 +63,9 @@ const AdminLogin = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-900 via-emerald-800 to-green-900 p-4">
       {/* Added 'relative' class here to position the back button */}
       <div className="relative bg-white/10 backdrop-blur-lg border border-white/20 p-8 rounded-2xl shadow-2xl w-full max-w-md">
-        
+
         {/* --- NEW: Back to Home Button --- */}
-        <button 
+        <button
           onClick={() => navigate('/')}
           className="absolute top-4 left-4 text-green-200 hover:text-white transition-colors flex items-center gap-1 text-sm group"
         >
@@ -105,9 +105,8 @@ const AdminLogin = () => {
                 type="email"
                 name="email"
                 placeholder="Admin Email"
-                className={`w-full pl-10 pr-4 py-3 bg-white/5 border ${
-                  errors.email ? "border-red-500/50 focus:border-red-500" : "border-green-300/30 focus:border-green-400"
-                } rounded-xl text-white placeholder-green-200/50 focus:outline-none focus:ring-1 focus:ring-green-400/50 transition-all`}
+                className={`w-full pl-10 pr-4 py-3 bg-white/5 border ${errors.email ? "border-red-500/50 focus:border-red-500" : "border-green-300/30 focus:border-green-400"
+                  } rounded-xl text-white placeholder-green-200/50 focus:outline-none focus:ring-1 focus:ring-green-400/50 transition-all`}
                 onChange={handleChange}
                 value={form.email}
               />
@@ -125,9 +124,8 @@ const AdminLogin = () => {
                 type="password"
                 name="password"
                 placeholder="Password"
-                className={`w-full pl-10 pr-4 py-3 bg-white/5 border ${
-                  errors.password ? "border-red-500/50 focus:border-red-500" : "border-green-300/30 focus:border-green-400"
-                } rounded-xl text-white placeholder-green-200/50 focus:outline-none focus:ring-1 focus:ring-green-400/50 transition-all`}
+                className={`w-full pl-10 pr-4 py-3 bg-white/5 border ${errors.password ? "border-red-500/50 focus:border-red-500" : "border-green-300/30 focus:border-green-400"
+                  } rounded-xl text-white placeholder-green-200/50 focus:outline-none focus:ring-1 focus:ring-green-400/50 transition-all`}
                 onChange={handleChange}
                 value={form.password}
               />

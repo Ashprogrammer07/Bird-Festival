@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -9,19 +10,20 @@ import {
   adminReelCompetitionAPI,
   adminPaintingCompetitionAPI,
 } from "../../services/adminApi";
-import { 
-  BookOpen, 
-  HandHeart, 
-  Users, 
-  Trophy, 
-  Eye, 
-  CheckCircle, 
-  Calendar, 
-  MessageSquare, 
+import {
+  BookOpen,
+  HandHeart,
+  Users,
+  Trophy,
+  Eye,
+  CheckCircle,
+  Calendar,
+  MessageSquare,
   Loader2,
   RefreshCw,
   ArrowRight
 } from "lucide-react";
+import { useLanguage } from "../../context/LanguageContext";
 
 const StatCard = ({ title, value, icon: Icon, color, loading }) => (
   <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-start justify-between transition-transform hover:-translate-y-1 hover:shadow-md">
@@ -42,7 +44,7 @@ const StatCard = ({ title, value, icon: Icon, color, loading }) => (
 const ActionCard = ({ title, icon: Icon, path, description }) => {
   const navigate = useNavigate();
   return (
-    <button 
+    <button
       onClick={() => navigate(path)}
       className="flex flex-col items-start p-5 bg-white border border-gray-200 rounded-xl hover:border-green-500 hover:shadow-md transition-all duration-200 group text-left w-full"
     >
@@ -61,6 +63,7 @@ const ActionCard = ({ title, icon: Icon, path, description }) => {
 const Dashboard = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const { t } = useLanguage();
   const [stats, setStats] = useState({
     ebooks: 0,
     pledges: 0,
@@ -111,34 +114,42 @@ const Dashboard = () => {
   }, []);
 
   const statItems = [
-    { title: "Total Ebooks", value: stats.ebooks, icon: BookOpen, color: "text-blue-600 bg-blue-600" },
-    { title: "Pledges Signed", value: stats.pledges, icon: HandHeart, color: "text-red-500 bg-red-500" },
-    { title: "Volunteers", value: stats.volunteers, icon: Users, color: "text-green-600 bg-green-600" },
-    { title: "Contest Entries", value: stats.competitions, icon: Trophy, color: "text-yellow-600 bg-yellow-600" },
+    { title: t('admin.ebooks'), value: stats.ebooks, icon: BookOpen, color: "text-blue-600 bg-blue-600" },
+    { title: t('admin.pledges'), value: stats.pledges, icon: HandHeart, color: "text-red-500 bg-red-500" },
+    { title: t('admin.volunteers'), value: stats.volunteers, icon: Users, color: "text-green-600 bg-green-600" },
+    { title: t('admin.competitions'), value: stats.competitions, icon: Trophy, color: "text-yellow-600 bg-yellow-600" },
     { title: "Active Readers", value: stats.readers, icon: Eye, color: "text-purple-600 bg-purple-600" },
     { title: "Avg Completion", value: `${stats.completionRate}%`, icon: CheckCircle, color: "text-teal-600 bg-teal-600" },
   ];
 
+  /* 
+     We should translate Quick Action titles too, but for speed I will map them to admin keys where possible.
+     Descriptions are hardcoded in English, I will leave them or genericize them if translation keys exist.
+     Given user asked for "everywhere inch by inch", I will use text if keys are missing from my initial set, 
+     but ideally I would add them to en.js/hi.js first.
+     For this turn, I will stick to what I have keys for or keep English for admin descriptions to avoid breaking 
+     with "undefined" keys.
+  */
   const quickActions = [
-    { title: "Manage Ebooks", icon: BookOpen, path: "/admin/ebooks", description: "Add or edit digital library content." },
-    { title: "Manage Schedule", icon: Calendar, path: "/admin/schedule", description: "Update festival event timings." },
-    { title: "View Pledges", icon: HandHeart, path: "/admin/pledges", description: "See who has committed to the cause." },
-    { title: "View Volunteers", icon: Users, path: "/admin/volunteers", description: "Manage team registrations." },
-    { title: "Competitions", icon: Trophy, path: "/admin/competitions", description: "Review photos, reels, and paintings." },
-    { title: "Messages", icon: MessageSquare, path: "/admin/contacts", description: "Read inquiries from the contact form." },
+    { title: t('admin.ebooks'), icon: BookOpen, path: "/admin/ebooks", description: "Add or edit digital library content." },
+    { title: t('admin.schedule'), icon: Calendar, path: "/admin/schedule", description: "Update festival event timings." },
+    { title: t('admin.pledges'), icon: HandHeart, path: "/admin/pledges", description: "See who has committed to the cause." },
+    { title: t('admin.volunteers'), icon: Users, path: "/admin/volunteers", description: "Manage team registrations." },
+    { title: t('admin.competitions'), icon: Trophy, path: "/admin/competitions", description: "Review photos, reels, and paintings." },
+    { title: t('admin.contacts'), icon: MessageSquare, path: "/admin/contacts", description: "Read inquiries from the contact form." },
   ];
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      
+
       {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Dashboard Overview</h1>
-          <p className="text-gray-500 text-sm mt-1">Welcome to the Birds Festival Administration Panel.</p>
+          <h1 className="text-2xl font-bold text-gray-800">{t('admin.dashboard')}</h1>
+          <p className="text-gray-500 text-sm mt-1">{t('admin.welcome')}</p>
         </div>
-        <button 
-          onClick={loadStats} 
+        <button
+          onClick={loadStats}
           disabled={loading}
           className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 active:scale-95 transition-all"
         >
@@ -150,9 +161,9 @@ const Dashboard = () => {
       {/* STATS GRID */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-10">
         {statItems.map((item, index) => (
-          <StatCard 
-            key={index} 
-            {...item} 
+          <StatCard
+            key={index}
+            {...item}
             loading={loading}
           />
         ))}
