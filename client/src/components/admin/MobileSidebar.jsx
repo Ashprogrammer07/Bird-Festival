@@ -1,18 +1,21 @@
+
 import { NavLink, useNavigate } from "react-router-dom";
-import { 
-  LayoutDashboard, 
-  Calendar, 
-  BookOpen, 
-  Users, 
-  HandHeart, 
-  FileQuestion, 
-  ClipboardCheck, 
-  Trophy, 
-  Mic2, 
-  HeartHandshake, 
+import {
+  LayoutDashboard,
+  Calendar,
+  BookOpen,
+  Users,
+  HandHeart,
+  FileQuestion,
+  ClipboardCheck,
+  Trophy,
+  Mic2,
+  HeartHandshake,
   Bird,
   LogOut,
-  X
+  X,
+  Info,
+  Image as ImageIcon // Added
 } from "lucide-react";
 
 const MobileSidebar = ({ open, setOpen }) => {
@@ -30,6 +33,7 @@ const MobileSidebar = ({ open, setOpen }) => {
     {
       label: "Overview",
       items: [
+        { name: "Festival Content", path: "/admin/festival", icon: Info },
         { name: "Dashboard", path: "/admin", icon: LayoutDashboard, end: true },
         { name: "Schedule", path: "/admin/schedule", icon: Calendar },
       ]
@@ -37,6 +41,7 @@ const MobileSidebar = ({ open, setOpen }) => {
     {
       label: "Content & Activities",
       items: [
+        { name: "Photo Gallery", path: "/admin/gallery", icon: ImageIcon },
         { name: "Ebooks", path: "/admin/ebooks", icon: BookOpen },
         { name: "Competitions", path: "/admin/competitions", icon: Trophy },
         { name: "Pledges", path: "/admin/pledges", icon: HandHeart },
@@ -63,28 +68,26 @@ const MobileSidebar = ({ open, setOpen }) => {
     <>
       {/* OVERLAY with Blur */}
       <div
-        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden transition-opacity duration-300 ${
-          open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
+        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden transition-opacity duration-300 ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+          }`}
         onClick={() => setOpen(false)}
       />
 
       {/* DRAWER */}
       <aside
-        className={`fixed top-0 left-0 h-full w-72 bg-green-900 text-white z-50 transform transition-transform duration-300 ease-in-out md:hidden flex flex-col shadow-2xl ${
-          open ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed top-0 left-0 h-full w-72 bg-green-900 text-white z-50 transform transition-transform duration-300 ease-in-out md:hidden flex flex-col shadow-2xl ${open ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         {/* HEADER */}
         <div className="p-5 flex items-center justify-between border-b border-green-800 bg-green-950/30">
           <div className="flex items-center gap-3">
-             <div className="bg-green-500/20 p-2 rounded-lg">
-                <Bird className="w-6 h-6 text-green-400" />
-             </div>
-             <div>
-                <h1 className="font-bold text-lg tracking-wide">Birds Festival</h1>
-                <p className="text-xs text-green-400 uppercase">Admin Panel</p>
-             </div>
+            <div className="bg-green-500/20 p-2 rounded-lg">
+              <Bird className="w-6 h-6 text-green-400" />
+            </div>
+            <div>
+              <h1 className="font-bold text-lg tracking-wide">Birds Festival</h1>
+              <p className="text-xs text-green-400 uppercase">Admin Panel</p>
+            </div>
           </div>
           <button
             onClick={() => setOpen(false)}
@@ -109,10 +112,9 @@ const MobileSidebar = ({ open, setOpen }) => {
                     end={link.end}
                     onClick={() => setOpen(false)}
                     className={({ isActive }) =>
-                      `flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
-                        isActive
-                          ? "bg-green-700 text-white shadow-md shadow-green-900/20 translate-x-1"
-                          : "text-green-100 hover:bg-white/10 hover:text-white"
+                      `flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${isActive
+                        ? "bg-green-700 text-white shadow-md shadow-green-900/20 translate-x-1"
+                        : "text-green-100 hover:bg-white/10 hover:text-white"
                       }`
                     }
                   >

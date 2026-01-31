@@ -3,13 +3,26 @@ import mongoose from 'mongoose';
 const ebookSchema = new mongoose.Schema(
   {
     title: {
-      type: String,
-      required: [true, 'E-book title is required'],
-      trim: true,
+      en: {
+        type: String,
+        required: [true, 'English e-book title is required'],
+        trim: true,
+      },
+      hi: {
+        type: String,
+        required: [true, 'Hindi e-book title is required'],
+        trim: true,
+      },
     },
     description: {
-      type: String,
-      required: [true, 'Description is required'],
+      en: {
+        type: String,
+        required: [true, 'English description is required'],
+      },
+      hi: {
+        type: String,
+        required: [true, 'Hindi description is required'],
+      },
     },
     fileName: {
       type: String,
@@ -24,8 +37,14 @@ const ebookSchema = new mongoose.Schema(
       default: '',
     },
     author: {
-      type: String,
-      default: 'Rajasthan Birding Festival',
+      en: {
+        type: String,
+        default: 'Rajasthan Birding Festival',
+      },
+      hi: {
+        type: String,
+        default: 'राजस्थान बर्डिंग फेस्टिवल',
+      },
     },
     pages: {
       type: Number,

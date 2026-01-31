@@ -3,13 +3,26 @@ import mongoose from 'mongoose';
 const festivalInfoSchema = new mongoose.Schema(
   {
     title: {
-      type: String,
-      required: [true, 'Festival title is required'],
-      trim: true,
+      en: {
+        type: String,
+        required: [true, 'English festival title is required'],
+        trim: true,
+      },
+      hi: {
+        type: String,
+        required: [true, 'Hindi festival title is required'],
+        trim: true,
+      },
     },
     description: {
-      type: String,
-      required: [true, 'Description is required'],
+      en: {
+        type: String,
+        required: [true, 'English description is required'],
+      },
+      hi: {
+        type: String,
+        required: [true, 'Hindi description is required'],
+      },
     },
     startDate: {
       type: Date,
@@ -20,29 +33,66 @@ const festivalInfoSchema = new mongoose.Schema(
       required: [true, 'End date is required'],
     },
     location: {
-      type: String,
-      required: [true, 'Location is required'],
+      en: {
+        type: String,
+        required: [true, 'English location is required'],
+      },
+      hi: {
+        type: String,
+        required: [true, 'Hindi location is required'],
+      },
     },
     heroImage: {
       type: String,
       default: '',
     },
     mission: {
-      type: String,
-      default: '',
+      en: {
+        type: String,
+        default: '',
+      },
+      hi: {
+        type: String,
+        default: '',
+      },
     },
     vision: {
-      type: String,
-      default: '',
+      en: {
+        type: String,
+        default: '',
+      },
+      hi: {
+        type: String,
+        default: '',
+      },
     },
     about: {
-      type: String,
-      default: '',
+      en: {
+        type: String,
+        default: '',
+      },
+      hi: {
+        type: String,
+        default: '',
+      },
     },
     isActive: {
       type: Boolean,
       default: true,
     },
+    features: [
+      {
+        title: {
+          en: { type: String, required: true },
+          hi: { type: String, required: true },
+        },
+        description: {
+          en: { type: String, required: true },
+          hi: { type: String, required: true },
+        },
+        icon: { type: String, default: 'sprout' }
+      }
+    ]
   },
   {
     timestamps: true,

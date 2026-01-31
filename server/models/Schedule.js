@@ -12,9 +12,16 @@ const scheduleSchema = new mongoose.Schema(
       required: [true, 'Date is required'],
     },
     title: {
-      type: String,
-      required: [true, 'Title is required'],
-      trim: true,
+      en: {
+        type: String,
+        required: [true, 'English title is required'],
+        trim: true,
+      },
+      hi: {
+        type: String,
+        required: [true, 'Hindi title is required'],
+        trim: true,
+      },
     },
     events: [
       {
@@ -23,16 +30,34 @@ const scheduleSchema = new mongoose.Schema(
           required: true,
         },
         activity: {
-          type: String,
-          required: true,
+          en: {
+            type: String,
+            required: true,
+          },
+          hi: {
+            type: String,
+            required: true,
+          },
         },
         location: {
-          type: String,
-          default: '',
+          en: {
+            type: String,
+            default: '',
+          },
+          hi: {
+            type: String,
+            default: '',
+          },
         },
         description: {
-          type: String,
-          default: '',
+          en: {
+            type: String,
+            default: '',
+          },
+          hi: {
+            type: String,
+            default: '',
+          },
         },
       },
     ],

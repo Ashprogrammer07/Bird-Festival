@@ -9,14 +9,28 @@ const resourcePersonSchema = new mongoose.Schema(
       minlength: [2, 'Name must be at least 2 characters'],
     },
     designation: {
-      type: String,
-      required: [true, 'Designation is required'],
-      trim: true,
+      en: {
+        type: String,
+        required: [true, 'English designation is required'],
+        trim: true,
+      },
+      hi: {
+        type: String,
+        required: [true, 'Hindi designation is required'],
+        trim: true,
+      },
     },
     organization: {
-      type: String,
-      required: [true, 'Organization is required'],
-      trim: true,
+      en: {
+        type: String,
+        required: [true, 'English organization is required'],
+        trim: true,
+      },
+      hi: {
+        type: String,
+        required: [true, 'Hindi organization is required'],
+        trim: true,
+      },
     },
     email: {
       type: String,
@@ -34,9 +48,16 @@ const resourcePersonSchema = new mongoose.Schema(
       trim: true,
     },
     expertise: {
-      type: String,
-      required: [true, 'Area of expertise is required'],
-      trim: true,
+      en: {
+        type: String,
+        required: [true, 'English expertise is required'],
+        trim: true,
+      },
+      hi: {
+        type: String,
+        required: [true, 'Hindi expertise is required'],
+        trim: true,
+      },
     },
     experience: {
       type: String,
@@ -49,13 +70,26 @@ const resourcePersonSchema = new mongoose.Schema(
       trim: true,
     },
     bio: {
-      type: String,
-      trim: true,
+      en: {
+        type: String,
+        trim: true,
+      },
+      hi: {
+        type: String,
+        trim: true,
+      },
     },
     topics: {
-      type: String,
-      required: [true, 'Topics are required'],
-      trim: true,
+      en: {
+        type: String,
+        required: [true, 'English topics are required'],
+        trim: true,
+      },
+      hi: {
+        type: String,
+        required: [true, 'Hindi topics are required'],
+        trim: true,
+      },
     },
     availability: {
       type: String,

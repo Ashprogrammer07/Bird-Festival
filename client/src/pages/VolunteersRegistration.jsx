@@ -1,7 +1,10 @@
+
 import { useState } from 'react';
 import { volunteerAPI } from '../services/api';
+import { useLanguage } from '../context/LanguageContext';
 
 const VolunteersRegistration = () => {
+  const { t } = useLanguage();
   const [formData, setFormData] = useState({
     name: '',
     idNumber: '',
@@ -30,15 +33,13 @@ const VolunteersRegistration = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        setError('File size should be less than 5MB');
+        setError(t('registration.fileHelp'));
         return;
       }
-      // Validate file type
       const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
       if (!allowedTypes.includes(file.type)) {
-        setError('Only PDF, JPG, and PNG files are allowed');
+        setError(t('registration.fileHelp'));
         return;
       }
       setFormData(prev => ({
@@ -57,7 +58,7 @@ const VolunteersRegistration = () => {
     setSubmitted(false);
 
     if (!formData.addressProof) {
-      setError('Please upload an address proof document');
+      setError(t('common.required'));
       setLoading(false);
       return;
     }
@@ -72,7 +73,7 @@ const VolunteersRegistration = () => {
       submitData.append('addressProof', formData.addressProof);
 
       await volunteerAPI.register(submitData);
-    setSubmitted(true);
+      setSubmitted(true);
       setFormData({
         name: '',
         idNumber: '',
@@ -85,14 +86,13 @@ const VolunteersRegistration = () => {
         experience: '',
         interests: ''
       });
-      // Reset file input
       const fileInput = document.getElementById('addressProof');
       if (fileInput) fileInput.value = '';
       setTimeout(() => {
         setSubmitted(false);
       }, 5000);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to submit registration. Please try again.');
+      setError(t('contact.error'));
     } finally {
       setLoading(false);
     }
@@ -120,7 +120,7 @@ const VolunteersRegistration = () => {
           <div className="relative z-10 container mx-auto px-4 md:px-6 h-full flex items-center">
             <div>
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white mb-2 md:mb-4">
-                Registration Successful!
+                {t('registration.successTitle')}
               </h1>
             </div>
           </div>
@@ -133,13 +133,13 @@ const VolunteersRegistration = () => {
                 <span className="text-3xl md:text-4xl text-white">✓</span>
               </div>
               <h2 className="text-xl md:text-2xl font-serif font-bold text-gray-800 mb-3 md:mb-4">
-                Thank You!
+                {t('registration.thankYou')}
               </h2>
               <p className="text-gray-600 mb-2">
-                Thank you for your interest in volunteering.
+                {t('registration.thankYouVol')}
               </p>
               <p className="text-gray-600">
-                We'll get back to you soon.
+                {t('registration.thankYouRes')}
               </p>
             </div>
           </div>
@@ -160,10 +160,10 @@ const VolunteersRegistration = () => {
         <div className="relative z-10 container mx-auto px-4 md:px-6 h-full flex items-center">
           <div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white mb-2 md:mb-4">
-              Volunteers Registration
+              {t('registration.volunteerTitle')}
             </h1>
             <p className="text-base md:text-lg lg:text-xl text-gray-200">
-              Join us in making a difference for nature
+              {t('registration.volunteerDesc')}
             </p>
           </div>
         </div>
@@ -180,12 +180,12 @@ const VolunteersRegistration = () => {
             {/* Personal Information */}
             <div className="mb-6 md:mb-8">
               <h2 className="text-xl md:text-2xl font-serif font-bold text-gray-800 mb-4 md:mb-6 pb-2 border-b-2 border-gray-200">
-                Personal Information
+                {t('registration.personalInfo')}
               </h2>
-              
+
               <div className="mb-4">
                 <label htmlFor="name" className="block text-gray-700 font-semibold mb-2">
-                  Full Name *
+                  {t('registration.fullName')} *
                 </label>
                 <input
                   type="text"
@@ -194,14 +194,14 @@ const VolunteersRegistration = () => {
                   value={formData.name}
                   onChange={handleChange}
                   required
-                  placeholder="Enter your full name"
+                  placeholder={t('registration.fullName')}
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-amber-500"
                 />
               </div>
 
               <div className="mb-4">
                 <label htmlFor="idNumber" className="block text-gray-700 font-semibold mb-2">
-                  ID Number *
+                  {t('registration.idNumber')} *
                 </label>
                 <input
                   type="text"
@@ -210,14 +210,14 @@ const VolunteersRegistration = () => {
                   value={formData.idNumber}
                   onChange={handleChange}
                   required
-                  placeholder="Enter your ID number"
+                  placeholder=""
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-amber-500"
                 />
               </div>
 
               <div className="mb-4">
                 <label htmlFor="addressProof" className="block text-gray-700 font-semibold mb-2">
-                  Address Proof Document *
+                  {t('registration.addressProof')} *
                 </label>
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-amber-500 transition-colors">
                   <input
@@ -232,16 +232,16 @@ const VolunteersRegistration = () => {
                   <label htmlFor="addressProof" className="cursor-pointer">
                     <span className="text-4xl mb-2 block">📄</span>
                     <span className="text-gray-600">
-                      {formData.addressProofFileName || 'Choose file (PDF, JPG, PNG)'}
+                      {formData.addressProofFileName || t('registration.chooseFile')}
                     </span>
                   </label>
                 </div>
-                <p className="text-sm text-gray-500 mt-2">Accepted formats: PDF, JPG, PNG (Max 5MB)</p>
+                <p className="text-sm text-gray-500 mt-2">{t('registration.fileHelp')}</p>
               </div>
 
               <div>
                 <label htmlFor="address" className="block text-gray-700 font-semibold mb-2">
-                  Address *
+                  {t('registration.address')} *
                 </label>
                 <textarea
                   id="address"
@@ -250,7 +250,7 @@ const VolunteersRegistration = () => {
                   onChange={handleChange}
                   required
                   rows="3"
-                  placeholder="Enter your complete address"
+                  placeholder=""
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-amber-500"
                 />
               </div>
@@ -259,13 +259,13 @@ const VolunteersRegistration = () => {
             {/* Contact Information */}
             <div className="mb-6 md:mb-8">
               <h2 className="text-xl md:text-2xl font-serif font-bold text-gray-800 mb-4 md:mb-6 pb-2 border-b-2 border-gray-200">
-                Contact Information
+                {t('registration.contactInfo')}
               </h2>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="email" className="block text-gray-700 font-semibold mb-2">
-                    Email Address *
+                    {t('registration.email')} *
                   </label>
                   <input
                     type="email"
@@ -274,14 +274,14 @@ const VolunteersRegistration = () => {
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    placeholder="your.email@example.com"
+                    placeholder="example@email.com"
                     className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-amber-500"
                   />
                 </div>
 
                 <div>
                   <label htmlFor="phone" className="block text-gray-700 font-semibold mb-2">
-                    Phone Number *
+                    {t('registration.phone')} *
                   </label>
                   <input
                     type="tel"
@@ -290,7 +290,7 @@ const VolunteersRegistration = () => {
                     value={formData.phone}
                     onChange={handleChange}
                     required
-                    placeholder="+1234567890"
+                    placeholder="+91..."
                     className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-amber-500"
                   />
                 </div>
@@ -300,12 +300,12 @@ const VolunteersRegistration = () => {
             {/* Educational Qualification */}
             <div className="mb-6 md:mb-8">
               <h2 className="text-xl md:text-2xl font-serif font-bold text-gray-800 mb-4 md:mb-6 pb-2 border-b-2 border-gray-200">
-                Educational Qualification
+                {t('registration.eduQual')}
               </h2>
-              
+
               <div className="mb-4">
                 <label htmlFor="educationalQualification" className="block text-gray-700 font-semibold mb-2">
-                  Highest Qualification *
+                  {t('registration.highestQual')} *
                 </label>
                 <select
                   id="educationalQualification"
@@ -315,7 +315,7 @@ const VolunteersRegistration = () => {
                   required
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-amber-500"
                 >
-                  <option value="">Select your qualification</option>
+                  <option value="">{t('registration.select')}</option>
                   {educationalOptions.map((option, index) => (
                     <option key={index} value={option}>{option}</option>
                   ))}
@@ -324,7 +324,7 @@ const VolunteersRegistration = () => {
 
               <div className="mb-4">
                 <label htmlFor="experience" className="block text-gray-700 font-semibold mb-2">
-                  Relevant Experience
+                  {t('registration.relevantExp')}
                 </label>
                 <textarea
                   id="experience"
@@ -332,14 +332,14 @@ const VolunteersRegistration = () => {
                   value={formData.experience}
                   onChange={handleChange}
                   rows="4"
-                  placeholder="Tell us about any relevant volunteer or work experience"
+                  placeholder=""
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-amber-500"
                 />
               </div>
 
               <div>
                 <label htmlFor="interests" className="block text-gray-700 font-semibold mb-2">
-                  Areas of Interest
+                  {t('registration.areasInterest')}
                 </label>
                 <textarea
                   id="interests"
@@ -347,7 +347,7 @@ const VolunteersRegistration = () => {
                   value={formData.interests}
                   onChange={handleChange}
                   rows="3"
-                  placeholder="What areas would you like to volunteer in? (e.g., event management, wildlife conservation, education)"
+                  placeholder={t('registration.volInterest')}
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-amber-500"
                 />
               </div>
@@ -360,7 +360,7 @@ const VolunteersRegistration = () => {
                 disabled={loading}
                 className="bg-amber-500 hover:bg-amber-600 text-white font-semibold px-6 md:px-8 py-3 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
               >
-                {loading ? 'Submitting...' : '✉️ Submit Registration'}
+                {loading ? t('common.loading') : `✉️ ${t('registration.submitVol')}`}
               </button>
               <button
                 type="button"
@@ -378,7 +378,7 @@ const VolunteersRegistration = () => {
                 })}
                 className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold px-6 py-3 rounded-lg transition-all duration-300 text-sm md:text-base"
               >
-                Reset Form
+                {t('registration.reset')}
               </button>
             </div>
           </form>

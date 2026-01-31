@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { adminVolunteerAPI } from "../../services/adminApi";
-import { 
-  Users, 
-  Search, 
-  Trash2, 
-  ExternalLink, 
-  Loader2, 
-  Mail, 
-  Phone, 
+import {
+  Users,
+  Search,
+  Trash2,
+  ExternalLink,
+  Loader2,
+  Mail,
+  Phone,
   FileText,
   Download,
   GraduationCap
@@ -21,7 +21,8 @@ const VolunteerAdmin = () => {
   const fetchVolunteers = async () => {
     try {
       const res = await adminVolunteerAPI.getAll();
-      setVolunteers(res.data);
+      // Handle both {data: {data: []}} and {data: []} response formats
+      setVolunteers(res.data.data || res.data || []);
     } catch (err) {
       console.error(err);
       alert("Failed to load volunteers");
@@ -70,9 +71,9 @@ const VolunteerAdmin = () => {
   };
 
   // --- Filter Logic ---
-  const filteredVolunteers = volunteers.filter((v) => 
-    v.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    v.email.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredVolunteers = (volunteers || []).filter((v) =>
+    (v.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (v.email || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {
@@ -85,7 +86,7 @@ const VolunteerAdmin = () => {
 
   return (
     <div className="max-w-6xl mx-auto">
-      
+
       {/* --- HEADER --- */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
@@ -114,7 +115,7 @@ const VolunteerAdmin = () => {
           </div>
 
           {/* Export */}
-          <button 
+          <button
             onClick={downloadCSV}
             className="flex items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
             title="Download List"
@@ -149,7 +150,7 @@ const VolunteerAdmin = () => {
               ) : (
                 filteredVolunteers.map((v) => (
                   <tr key={v._id} className="hover:bg-gray-50 transition-colors">
-                    
+
                     {/* Applicant Name */}
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
